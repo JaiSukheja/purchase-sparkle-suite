@@ -1,74 +1,101 @@
 import { useState } from "react";
-import Sidebar from "@/components/layout/Sidebar";
-import Dashboard from "@/components/dashboard/Dashboard";
+import { useNavigate } from "react-router-dom";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import CustomerList from "@/components/customers/CustomerList";
-import { Customer } from "@/types/customer";
-import { useToast } from "@/hooks/use-toast";
+import Dashboard from "@/components/dashboard/Dashboard";
+import Sidebar from "@/components/layout/Sidebar";
+import CustomerForm from "@/components/forms/CustomerForm";
+import { useCustomers } from "@/hooks/useCustomers";
+import { useAuth } from "@/hooks/useAuth";
+import { Customer } from "@/types/database";
+import { LogOut } from "lucide-react";
 
 const Index = () => {
-  const [activeTab, setActiveTab] = useState('dashboard');
-  const { toast } = useToast();
+  const navigate = useNavigate();
+  const { signOut } = useAuth();
+  const { customers, createCustomer, updateCustomer, loading } = useCustomers();
+  const [activeView, setActiveView] = useState<'dashboard' | 'customers'>('dashboard');
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [formLoading, setFormLoading] = useState(false);
 
   const handleEditCustomer = (customer: Customer) => {
-    toast({
-      title: "Edit Customer",
-      description: `Opening edit form for ${customer.name}`,
-    });
+    setSelectedCustomer(customer);
+    setShowEditDialog(true);
   };
 
-  const handleAddPurchase = (customer: Customer) => {
-    toast({
-      title: "Add Purchase",
-      description: `Adding purchase for ${customer.name}`,
-    });
+  const handleViewCustomer = (customer: Customer) => {
+    navigate(`/customer/${customer.id}`);
   };
 
   const handleAddCustomer = () => {
-    toast({
-      title: "Add Customer",
-      description: "Opening new customer form",
-    });
+    setSelectedCustomer(null);
+    setShowEditDialog(true);
   };
 
-  const renderContent = () => {
-    switch (activeTab) {
-      case 'dashboard':
-        return <Dashboard onEditCustomer={handleEditCustomer} onAddPurchase={handleAddPurchase} />;
-      case 'customers':
-        return (
-          <CustomerList
-            onEditCustomer={handleEditCustomer}
-            onAddPurchase={handleAddPurchase}
-            onAddCustomer={handleAddCustomer}
-          />
-        );
-      case 'purchases':
-        return (
-          <div className="space-y-6">
-            <h1 className="text-3xl font-bold">Purchases</h1>
-            <p className="text-muted-foreground">Purchase management coming soon...</p>
-          </div>
-        );
-      case 'analytics':
-        return (
-          <div className="space-y-6">
-            <h1 className="text-3xl font-bold">Analytics</h1>
-            <p className="text-muted-foreground">Analytics dashboard coming soon...</p>
-          </div>
-        );
-      default:
-        return <Dashboard onEditCustomer={handleEditCustomer} onAddPurchase={handleAddPurchase} />;
+  const handleCustomerSubmit = async (customerData: Omit<Customer, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
+    setFormLoading(true);
+    
+    if (selectedCustomer) {
+      await updateCustomer(selectedCustomer.id, customerData);
+    } else {
+      await createCustomer(customerData);
     }
+    
+    setFormLoading(false);
+    setShowEditDialog(false);
+    setSelectedCustomer(null);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-secondary">
+    <div className="min-h-screen bg-gradient-primary">
       <div className="flex">
-        <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
-        <main className="flex-1 p-8">
-          {renderContent()}
+        <Sidebar activeView={activeView} onViewChange={setActiveView} />
+        
+        <main className="flex-1 p-4 lg:p-6 ml-64">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h1 className="text-2xl font-bold">Client Manager</h1>
+              <Button variant="outline" onClick={() => signOut()}>
+                <LogOut className="mr-2 h-4 w-4" />
+                Sign Out
+              </Button>
+            </div>
+            
+            {activeView === 'dashboard' && (
+              <Dashboard 
+                customers={customers}
+                onEditCustomer={handleEditCustomer}
+                onViewCustomer={handleViewCustomer}
+              />
+            )}
+            {activeView === 'customers' && (
+              <CustomerList 
+                customers={customers}
+                onEditCustomer={handleEditCustomer}
+                onViewCustomer={handleViewCustomer}
+                onAddCustomer={handleAddCustomer}
+                loading={loading}
+              />
+            )}
+          </div>
         </main>
       </div>
+
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{selectedCustomer ? 'Edit Customer' : 'Add New Customer'}</DialogTitle>
+          </DialogHeader>
+          <CustomerForm
+            customer={selectedCustomer}
+            onSubmit={handleCustomerSubmit}
+            onCancel={() => setShowEditDialog(false)}
+            loading={formLoading}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
