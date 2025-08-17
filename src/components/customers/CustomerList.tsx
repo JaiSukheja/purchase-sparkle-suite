@@ -5,25 +5,37 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import CustomerCard from "./CustomerCard";
 import { mockCustomers } from "@/data/mockData";
-import { Customer } from "@/types/customer";
+import { Customer } from "@/types/database";
 
 interface CustomerListProps {
+  customers: Customer[];
   onEditCustomer: (customer: Customer) => void;
-  onAddPurchase: (customer: Customer) => void;
+  onViewCustomer: (customer: Customer) => void;
   onAddCustomer: () => void;
+  loading: boolean;
 }
 
-const CustomerList = ({ onEditCustomer, onAddPurchase, onAddCustomer }: CustomerListProps) => {
+const CustomerList = ({ customers, onEditCustomer, onViewCustomer, onAddCustomer, loading }: CustomerListProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive'>('all');
 
-  const filteredCustomers = mockCustomers.filter(customer => {
+  const filteredCustomers = customers.filter(customer => {
     const matchesSearch = customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          customer.company?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = filterStatus === 'all' || customer.status === filterStatus;
     return matchesSearch && matchesStatus;
   });
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">Loading customers...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -83,7 +95,7 @@ const CustomerList = ({ onEditCustomer, onAddPurchase, onAddCustomer }: Customer
             key={customer.id}
             customer={customer}
             onEdit={onEditCustomer}
-            onAddPurchase={onAddPurchase}
+            onAddPurchase={() => onViewCustomer(customer)}
           />
         ))}
       </div>

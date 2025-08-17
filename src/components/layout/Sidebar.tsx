@@ -2,11 +2,11 @@ import { Users, ShoppingCart, BarChart3, Plus, Home } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface SidebarProps {
-  activeTab: string;
-  onTabChange: (tab: string) => void;
+  activeView: 'dashboard' | 'customers';
+  onViewChange: (view: 'dashboard' | 'customers') => void;
 }
 
-const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
+const Sidebar = ({ activeView, onViewChange }: SidebarProps) => {
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home },
     { id: 'customers', label: 'Customers', icon: Users },
@@ -29,11 +29,11 @@ const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
           return (
             <button
               key={item.id}
-              onClick={() => onTabChange(item.id)}
+              onClick={() => onViewChange(item.id as 'dashboard' | 'customers')}
               className={cn(
                 "w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all duration-200",
                 "hover:bg-accent/50 hover:shadow-soft",
-                activeTab === item.id
+                activeView === item.id
                   ? "bg-gradient-primary text-primary-foreground shadow-elegant"
                   : "text-foreground/80"
               )}

@@ -1,4 +1,4 @@
-import { Customer } from "@/types/customer";
+import { Customer } from "@/types/database";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -17,7 +17,7 @@ const CustomerCard = ({ customer, onEdit, onAddPurchase }: CustomerCardProps) =>
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
           <Avatar className="h-12 w-12">
-            <AvatarImage src={customer.avatar} />
+            <AvatarImage src={customer.avatar_url} />
             <AvatarFallback className="bg-gradient-primary text-primary-foreground">
               {customer.name.split(' ').map(n => n[0]).join('')}
             </AvatarFallback>
@@ -48,7 +48,7 @@ const CustomerCard = ({ customer, onEdit, onAddPurchase }: CustomerCardProps) =>
         )}
         <div className="flex items-center gap-2">
           <DollarSign className="h-4 w-4" />
-          <span className="font-medium">${customer.totalPurchases.toLocaleString()}</span>
+          <span className="font-medium">Customer since {new Date(customer.created_at).toLocaleDateString()}</span>
         </div>
       </div>
       
