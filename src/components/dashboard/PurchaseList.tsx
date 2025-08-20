@@ -98,32 +98,37 @@ const PurchaseList = ({ onBack }: PurchaseListProps) => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <Button variant="ghost" size="sm" onClick={onBack}>
-              ← Back
-            </Button>
+            {onBack && (
+              <Button variant="ghost" size="sm" onClick={onBack} className="p-1 h-8 w-8">
+                ← 
+              </Button>
+            )}
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold">Purchases</h1>
-          <p className="text-muted-foreground">Track all purchase transactions</p>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white">Purchases</h1>
+          <p className="text-slate-600 dark:text-slate-300 text-sm sm:text-base">Track all purchase transactions</p>
         </div>
-        <Button onClick={() => setShowPurchaseForm(true)} className="bg-gradient-primary hover:opacity-90">
+        <Button 
+          onClick={() => setShowPurchaseForm(true)} 
+          className="bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 dark:text-slate-900 w-full sm:w-auto"
+        >
           <Plus className="h-4 w-4 mr-2" />
           Add Purchase
         </Button>
       </div>
 
       {/* Search */}
-      <Card className="p-4 bg-gradient-card shadow-soft">
+      <Card className="p-4 bg-white dark:bg-slate-800 shadow-soft border-slate-200 dark:border-slate-700">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
           <Input
             placeholder="Search purchases..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
+            className="pl-10 h-10 sm:h-11"
           />
         </div>
       </Card>
@@ -131,33 +136,33 @@ const PurchaseList = ({ onBack }: PurchaseListProps) => {
       {/* Purchase List */}
       <div className="grid gap-4">
         {filteredPurchases.map((purchase) => (
-          <Card key={purchase.id} className="p-6 bg-gradient-card shadow-soft hover:shadow-elegant transition-all duration-300">
+          <Card key={purchase.id} className="p-4 sm:p-6 bg-white dark:bg-slate-800 shadow-soft hover:shadow-elegant transition-all duration-300 border-slate-200 dark:border-slate-700">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div className="flex items-start gap-4 flex-1">
-                <div className="p-3 bg-primary/10 rounded-lg">
-                  <Package className="h-6 w-6 text-primary" />
+              <div className="flex items-start gap-4 flex-1 min-w-0">
+                <div className="p-3 bg-slate-100 dark:bg-slate-700 rounded-lg flex-shrink-0">
+                  <Package className="h-5 w-5 sm:h-6 sm:w-6 text-slate-600 dark:text-slate-300" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-lg truncate">{purchase.product_name}</h3>
-                  <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mt-1">
+                  <h3 className="font-semibold text-base sm:text-lg text-slate-900 dark:text-white truncate">{purchase.product_name}</h3>
+                  <div className="flex flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1">
                     <span>Qty: {purchase.quantity}</span>
                     <span>Unit: ${purchase.unit_price.toFixed(2)}</span>
-                    <span className="font-medium text-foreground">Total: ${purchase.total_amount.toFixed(2)}</span>
+                    <span className="font-medium text-slate-900 dark:text-white">Total: ${purchase.total_amount.toFixed(2)}</span>
                   </div>
                   <div className="flex items-center gap-2 mt-2">
-                    <Badge variant="outline">
+                    <Badge variant="outline" className="text-xs">
                       {new Date(purchase.purchase_date).toLocaleDateString()}
                     </Badge>
                   </div>
                   {purchase.notes && (
-                    <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
+                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-2 line-clamp-2">
                       {purchase.notes}
                     </p>
                   )}
                 </div>
               </div>
               
-              <div className="flex gap-2 self-end sm:self-auto">
+              <div className="flex gap-2 self-end sm:self-auto flex-shrink-0">
                 <Button 
                   variant="outline" 
                   size="sm" 
@@ -165,15 +170,19 @@ const PurchaseList = ({ onBack }: PurchaseListProps) => {
                     setSelectedPurchase(purchase);
                     setShowPurchaseForm(true);
                   }}
+                  className="h-8 w-8 p-0 sm:h-9 sm:w-auto sm:px-3"
                 >
-                  <Edit className="h-4 w-4" />
+                  <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline ml-1">Edit</span>
                 </Button>
                 <Button 
                   variant="outline" 
                   size="sm" 
                   onClick={() => handleDeletePurchase(purchase.id)}
+                  className="h-8 w-8 p-0 sm:h-9 sm:w-auto sm:px-3 text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/20"
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline ml-1">Delete</span>
                 </Button>
               </div>
             </div>
@@ -182,10 +191,10 @@ const PurchaseList = ({ onBack }: PurchaseListProps) => {
       </div>
 
       {filteredPurchases.length === 0 && (
-        <Card className="p-12 text-center bg-gradient-card shadow-soft">
-          <Package className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-          <p className="text-muted-foreground text-lg">No purchases found</p>
-          <p className="text-sm text-muted-foreground mt-1">
+        <Card className="p-8 sm:p-12 text-center bg-white dark:bg-slate-800 shadow-soft border-slate-200 dark:border-slate-700">
+          <Package className="h-12 w-12 sm:h-16 sm:w-16 text-slate-400 mx-auto mb-4" />
+          <p className="text-slate-600 dark:text-slate-300 text-base sm:text-lg">No purchases found</p>
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
             {searchTerm ? "Try adjusting your search" : "Start by adding your first purchase"}
           </p>
         </Card>
