@@ -1,4 +1,4 @@
-import { ArrowRight, Users, FileText, BarChart3, Zap, Shield, CheckCircle } from "lucide-react";
+import { ArrowRight, Users, FileText, BarChart3, Zap, Shield, CheckCircle, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
@@ -67,9 +67,11 @@ const Landing = () => {
               <Button 
                 variant="outline" 
                 size="lg"
+                onClick={() => navigate('/customer-auth')}
                 className="border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800"
               >
-                Watch Demo
+                <User className="mr-2 h-5 w-5" />
+                Customer Login
               </Button>
             </div>
           </div>
