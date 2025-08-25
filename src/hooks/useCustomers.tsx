@@ -3,21 +3,24 @@ import { supabase } from '@/integrations/supabase/client';
 import { Customer } from '@/types/database';
 import { useAuth } from './useAuth';
 import { useToast } from './use-toast';
+import { useOrganizationContext } from './useOrganizationContext';
 
 export const useCustomers = () => {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const { toast } = useToast();
+  const { selectedOrganizationId } = useOrganizationContext();
 
   const fetchCustomers = async () => {
-    if (!user) return;
+    if (!user || !selectedOrganizationId) return;
     
     setLoading(true);
     const { data, error } = await supabase
       .from('customers')
       .select('*')
       .eq('user_id', user.id)
+      .eq('organization_id', selectedOrganizationId)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -34,14 +37,14 @@ export const useCustomers = () => {
 
   useEffect(() => {
     fetchCustomers();
-  }, [user]);
+  }, [user, selectedOrganizationId]);
 
   const createCustomer = async (customerData: Omit<Customer, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
-    if (!user) return null;
+    if (!user || !selectedOrganizationId) return null;
 
     const { data, error } = await supabase
       .from('customers')
-      .insert([{ ...customerData, user_id: user.id }])
+      .insert([{ ...customerData, user_id: user.id, organization_id: selectedOrganizationId }])
       .select()
       .single();
 

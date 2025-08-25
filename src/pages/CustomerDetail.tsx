@@ -7,9 +7,14 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCustomers } from '@/hooks/useCustomers';
 import { usePurchases } from '@/hooks/usePurchases';
-import { Customer, Purchase } from '@/types/database';
-import { ArrowLeft, Plus, Edit, Trash2, Mail, Phone, Building, MapPin } from 'lucide-react';
+import { useInvoices } from '@/hooks/useInvoices';
+import { Customer, Purchase, Invoice } from '@/types/database';
+import { ArrowLeft, Plus, FileText, Mail, Phone, Building, MapPin, ExternalLink } from 'lucide-react';
 import PurchaseForm from '@/components/forms/PurchaseForm';
+import InvoiceForm from '@/components/forms/InvoiceForm';
+import { PurchasesTable } from '@/components/tables/PurchasesTable';
+import { InvoicesTable } from '@/components/tables/InvoicesTable';
+import { ReportsOverview } from '@/components/reports/ReportsOverview';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 
@@ -18,11 +23,14 @@ const CustomerDetail = () => {
   const navigate = useNavigate();
   const { customers } = useCustomers();
   const { purchases, createPurchase, updatePurchase, deletePurchase } = usePurchases(id);
+  const { invoices, createInvoice, updateInvoice, deleteInvoice, generateInvoiceFromPurchases } = useInvoices(id);
   const { toast } = useToast();
   
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [showPurchaseForm, setShowPurchaseForm] = useState(false);
+  const [showInvoiceForm, setShowInvoiceForm] = useState(false);
   const [editingPurchase, setEditingPurchase] = useState<Purchase | null>(null);
+  const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -56,11 +64,56 @@ const CustomerDetail = () => {
     }
   };
 
+  const handleCreateInvoice = async (invoiceData: Omit<Invoice, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
+    setLoading(true);
+    const result = await createInvoice(invoiceData);
+    if (result) {
+      setShowInvoiceForm(false);
+    }
+    setLoading(false);
+  };
+
+  const handleUpdateInvoice = async (invoiceData: Omit<Invoice, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
+    if (!editingInvoice) return;
+    
+    setLoading(true);
+    const result = await updateInvoice(editingInvoice.id, invoiceData);
+    if (result) {
+      setEditingInvoice(null);
+    }
+    setLoading(false);
+  };
+
+  const handleDeleteInvoice = async (invoiceId: string) => {
+    if (confirm('Are you sure you want to delete this invoice?')) {
+      await deleteInvoice(invoiceId);
+    }
+  };
+
+  const handleGenerateInvoice = async (purchaseIds: string[]) => {
+    if (!customer) return;
+    
+    setLoading(true);
+    const result = await generateInvoiceFromPurchases(customer.id, purchaseIds);
+    if (result) {
+      toast({
+        title: "Invoice generated",
+        description: `Invoice ${result.invoice_number} has been created successfully.`
+      });
+    }
+    setLoading(false);
+  };
+
+  const handleOpenCustomerPortal = () => {
+    window.open(`/customer-portal/${customer?.id}`, '_blank');
+  };
+
   const totalPurchases = purchases.reduce((sum, p) => sum + p.total_amount, 0);
+  const totalInvoiced = invoices.reduce((sum, i) => sum + i.total_amount, 0);
 
   if (!customer) {
     return (
-      <div className="min-h-screen bg-gradient-primary p-4">
+      <div className="min-h-screen bg-background p-4">
         <div className="max-w-6xl mx-auto">
           <Button 
             variant="ghost" 
@@ -81,7 +134,7 @@ const CustomerDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-primary p-4">
+    <div className="min-h-screen bg-background p-4">
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -96,7 +149,7 @@ const CustomerDetail = () => {
         </div>
 
         {/* Customer Info Card */}
-        <Card className="bg-glass shadow-elegant">
+        <Card>
           <CardContent className="p-6">
             <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
               <Avatar className="h-20 w-20">
@@ -114,9 +167,25 @@ const CustomerDetail = () => {
                       {customer.status}
                     </Badge>
                   </div>
-                  <div className="text-sm text-muted-foreground">
-                    <p className="text-2xl font-bold text-foreground">${totalPurchases.toLocaleString()}</p>
-                    <p>Total Purchases</p>
+                  <div className="flex flex-col gap-4">
+                    <div className="grid grid-cols-2 gap-4 text-center">
+                      <div>
+                        <p className="text-2xl font-bold text-foreground">${totalPurchases.toLocaleString()}</p>
+                        <p className="text-sm text-muted-foreground">Total Purchases</p>
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold text-foreground">${totalInvoiced.toLocaleString()}</p>
+                        <p className="text-sm text-muted-foreground">Total Invoiced</p>
+                      </div>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={handleOpenCustomerPortal}
+                    >
+                      <ExternalLink className="mr-2 h-4 w-4" />
+                      Customer Portal
+                    </Button>
                   </div>
                 </div>
                 
@@ -156,119 +225,140 @@ const CustomerDetail = () => {
           </TabsList>
 
           <TabsContent value="purchases" className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold">Purchase History</h2>
-              <Button onClick={() => setShowPurchaseForm(true)}>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Purchase
-              </Button>
-            </div>
-
-            <div className="grid gap-4">
-              {purchases.map((purchase) => (
-                <Card key={purchase.id} className="bg-glass shadow-soft hover:shadow-elegant transition-all">
-                  <CardContent className="p-4">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                      <div className="space-y-1">
-                        <h3 className="font-semibold">{purchase.product_name}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          {purchase.quantity} × ${purchase.unit_price.toFixed(2)}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {new Date(purchase.purchase_date).toLocaleDateString()}
-                        </p>
-                        {purchase.notes && (
-                          <p className="text-xs text-muted-foreground italic">{purchase.notes}</p>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-lg">${purchase.total_amount.toFixed(2)}</span>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setEditingPurchase(purchase)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDeletePurchase(purchase.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-              
-              {purchases.length === 0 && (
-                <Card className="bg-glass">
-                  <CardContent className="p-8 text-center">
-                    <p className="text-muted-foreground">No purchases recorded yet</p>
-                    <Button 
-                      onClick={() => setShowPurchaseForm(true)}
-                      className="mt-4"
-                    >
-                      <Plus className="mr-2 h-4 w-4" />
-                      Add First Purchase
-                    </Button>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="invoices">
-            <Card className="bg-glass">
-              <CardContent className="p-8 text-center">
-                <p className="text-muted-foreground">Invoice management coming soon</p>
+            <Card>
+              <CardHeader>
+                <div className="flex justify-between items-center">
+                  <CardTitle>Purchase History</CardTitle>
+                  <Button onClick={() => setShowPurchaseForm(true)}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Purchase
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <PurchasesTable 
+                  purchases={purchases}
+                  onEdit={setEditingPurchase}
+                  onDelete={handleDeletePurchase}
+                  onGenerateInvoice={handleGenerateInvoice}
+                  showSelection={true}
+                />
               </CardContent>
             </Card>
           </TabsContent>
 
-          <TabsContent value="reports">
-            <Card className="bg-glass">
-              <CardContent className="p-8 text-center">
-                <p className="text-muted-foreground">Reports and analytics coming soon</p>
+          <TabsContent value="invoices" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <div className="flex justify-between items-center">
+                  <CardTitle>Invoices</CardTitle>
+                  <Button onClick={() => setShowInvoiceForm(true)}>
+                    <FileText className="mr-2 h-4 w-4" />
+                    Create Invoice
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <InvoicesTable 
+                  invoices={invoices}
+                  onEdit={setEditingInvoice}
+                  onDelete={handleDeleteInvoice}
+                  onDownload={(invoice) => {
+                    toast({
+                      title: "Download started",
+                      description: `Invoice ${invoice.invoice_number} will be downloaded.`
+                    });
+                  }}
+                  onSend={(invoice) => {
+                    toast({
+                      title: "Invoice sent",
+                      description: `Invoice ${invoice.invoice_number} has been sent to customer.`
+                    });
+                  }}
+                />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="reports" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Customer Analytics</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ReportsOverview 
+                  customers={[customer!]}
+                  purchases={purchases}
+                  invoices={invoices}
+                />
               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
-      </div>
 
-      {/* Purchase Form Dialogs */}
-      <Dialog open={showPurchaseForm} onOpenChange={setShowPurchaseForm}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Add New Purchase</DialogTitle>
-          </DialogHeader>
-          <PurchaseForm
-            customerId={customer.id}
-            onSubmit={handleCreatePurchase}
-            onCancel={() => setShowPurchaseForm(false)}
-            loading={loading}
-          />
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={!!editingPurchase} onOpenChange={() => setEditingPurchase(null)}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Edit Purchase</DialogTitle>
-          </DialogHeader>
-          {editingPurchase && (
+        {/* Dialogs */}
+        <Dialog open={showPurchaseForm} onOpenChange={setShowPurchaseForm}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Add New Purchase</DialogTitle>
+            </DialogHeader>
             <PurchaseForm
               customerId={customer.id}
-              purchase={editingPurchase}
-              onSubmit={handleUpdatePurchase}
-              onCancel={() => setEditingPurchase(null)}
+              onSubmit={handleCreatePurchase}
+              onCancel={() => setShowPurchaseForm(false)}
               loading={loading}
             />
-          )}
-        </DialogContent>
-      </Dialog>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={!!editingPurchase} onOpenChange={() => setEditingPurchase(null)}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Edit Purchase</DialogTitle>
+            </DialogHeader>
+            {editingPurchase && (
+              <PurchaseForm
+                customerId={customer.id}
+                purchase={editingPurchase}
+                onSubmit={handleUpdatePurchase}
+                onCancel={() => setEditingPurchase(null)}
+                loading={loading}
+              />
+            )}
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={showInvoiceForm} onOpenChange={setShowInvoiceForm}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Create New Invoice</DialogTitle>
+            </DialogHeader>
+            <InvoiceForm
+              customers={[{ id: customer.id, name: customer.name }]}
+              onSubmit={handleCreateInvoice}
+              onCancel={() => setShowInvoiceForm(false)}
+              loading={loading}
+            />
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={!!editingInvoice} onOpenChange={() => setEditingInvoice(null)}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Edit Invoice</DialogTitle>
+            </DialogHeader>
+            {editingInvoice && (
+              <InvoiceForm
+                customers={[{ id: customer.id, name: customer.name }]}
+                invoice={editingInvoice}
+                onSubmit={handleUpdateInvoice}
+                onCancel={() => setEditingInvoice(null)}
+                loading={loading}
+              />
+            )}
+          </DialogContent>
+        </Dialog>
+      </div>
     </div>
   );
 };

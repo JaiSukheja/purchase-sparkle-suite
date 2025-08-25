@@ -3,7 +3,21 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Plus, Edit, Trash2, Package } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Search, Plus, Edit, Trash2, Package, MoreHorizontal } from "lucide-react";
 import { Purchase } from "@/types/database";
 import { usePurchases } from "@/hooks/usePurchases";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -133,62 +147,80 @@ const PurchaseList = ({ onBack }: PurchaseListProps) => {
         </div>
       </Card>
 
-      {/* Purchase List */}
-      <div className="grid gap-4">
-        {filteredPurchases.map((purchase) => (
-          <Card key={purchase.id} className="p-4 sm:p-6 bg-white dark:bg-slate-800 shadow-soft hover:shadow-elegant transition-all duration-300 border-slate-200 dark:border-slate-700">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div className="flex items-start gap-4 flex-1 min-w-0">
-                <div className="p-3 bg-slate-100 dark:bg-slate-700 rounded-lg flex-shrink-0">
-                  <Package className="h-5 w-5 sm:h-6 sm:w-6 text-slate-600 dark:text-slate-300" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-base sm:text-lg text-slate-900 dark:text-white truncate">{purchase.product_name}</h3>
-                  <div className="flex flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1">
-                    <span>Qty: {purchase.quantity}</span>
-                    <span>Unit: ${purchase.unit_price.toFixed(2)}</span>
-                    <span className="font-medium text-slate-900 dark:text-white">Total: ${purchase.total_amount.toFixed(2)}</span>
-                  </div>
-                  <div className="flex items-center gap-2 mt-2">
-                    <Badge variant="outline" className="text-xs">
-                      {new Date(purchase.purchase_date).toLocaleDateString()}
-                    </Badge>
-                  </div>
-                  {purchase.notes && (
-                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-2 line-clamp-2">
-                      {purchase.notes}
-                    </p>
-                  )}
-                </div>
-              </div>
-              
-              <div className="flex gap-2 self-end sm:self-auto flex-shrink-0">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => {
-                    setSelectedPurchase(purchase);
-                    setShowPurchaseForm(true);
-                  }}
-                  className="h-8 w-8 p-0 sm:h-9 sm:w-auto sm:px-3"
-                >
-                  <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
-                  <span className="hidden sm:inline ml-1">Edit</span>
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => handleDeletePurchase(purchase.id)}
-                  className="h-8 w-8 p-0 sm:h-9 sm:w-auto sm:px-3 text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/20"
-                >
-                  <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
-                  <span className="hidden sm:inline ml-1">Delete</span>
-                </Button>
-              </div>
-            </div>
-          </Card>
-        ))}
-      </div>
+      {/* Purchase Table */}
+      <Card>
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Product/Service</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead className="text-right">Qty</TableHead>
+                <TableHead className="text-right">Unit Price</TableHead>
+                <TableHead className="text-right">Total</TableHead>
+                <TableHead>Notes</TableHead>
+                <TableHead className="w-[100px]">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredPurchases.map((purchase) => (
+                <TableRow key={purchase.id} className="hover:bg-muted/50">
+                  <TableCell className="font-medium">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-muted rounded-lg">
+                        <Package className="h-4 w-4 text-muted-foreground" />
+                      </div>
+                      {purchase.product_name}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    {new Date(purchase.purchase_date).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {purchase.quantity}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    ${purchase.unit_price.toFixed(2)}
+                  </TableCell>
+                  <TableCell className="text-right font-medium">
+                    ${purchase.total_amount.toFixed(2)}
+                  </TableCell>
+                  <TableCell>
+                    <div className="max-w-[200px] truncate text-sm text-muted-foreground">
+                      {purchase.notes || '-'}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="bg-background border">
+                        <DropdownMenuItem onClick={() => {
+                          setSelectedPurchase(purchase);
+                          setShowPurchaseForm(true);
+                        }}>
+                          <Edit className="mr-2 h-4 w-4" />
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={() => handleDeletePurchase(purchase.id)}
+                          className="text-destructive"
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </Card>
 
       {filteredPurchases.length === 0 && (
         <Card className="p-8 sm:p-12 text-center bg-white dark:bg-slate-800 shadow-soft border-slate-200 dark:border-slate-700">

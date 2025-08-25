@@ -1,10 +1,23 @@
 import { useState } from "react";
-import { Search, Plus, Filter } from "lucide-react";
+import { Search, Plus, Filter, Eye, Edit, MoreHorizontal } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import CustomerCard from "./CustomerCard";
-import { mockCustomers } from "@/data/mockData";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Customer } from "@/types/database";
 
 interface CustomerListProps {
@@ -88,17 +101,66 @@ const CustomerList = ({ customers, onEditCustomer, onViewCustomer, onAddCustomer
         </div>
       </Card>
 
-      {/* Customer Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredCustomers.map((customer) => (
-          <CustomerCard
-            key={customer.id}
-            customer={customer}
-            onEdit={onEditCustomer}
-            onAddPurchase={() => onViewCustomer(customer)}
-          />
-        ))}
-      </div>
+      {/* Customer Table */}
+      <Card>
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Phone</TableHead>
+                <TableHead>Company</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="w-[100px]">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredCustomers.map((customer) => (
+                <TableRow key={customer.id} className="hover:bg-muted/50">
+                  <TableCell className="font-medium">
+                    <div className="flex items-center gap-3">
+                      <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                        <span className="text-sm font-medium">
+                          {customer.name.charAt(0).toUpperCase()}
+                        </span>
+                      </div>
+                      {customer.name}
+                    </div>
+                  </TableCell>
+                  <TableCell>{customer.email}</TableCell>
+                  <TableCell>{customer.phone}</TableCell>
+                  <TableCell>{customer.company || '-'}</TableCell>
+                  <TableCell>
+                    <Badge variant={customer.status === 'active' ? 'default' : 'secondary'}>
+                      {customer.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="bg-background border">
+                        <DropdownMenuItem onClick={() => onViewCustomer(customer)}>
+                          <Eye className="mr-2 h-4 w-4" />
+                          View
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => onEditCustomer(customer)}>
+                          <Edit className="mr-2 h-4 w-4" />
+                          Edit
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </Card>
 
       {filteredCustomers.length === 0 && (
         <Card className="p-12 text-center bg-gradient-card shadow-soft">

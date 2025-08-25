@@ -1,14 +1,17 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Purchase } from '@/types/database';
+import { Purchase, Customer } from '@/types/database';
 import { Loader2 } from 'lucide-react';
+import { useCustomers } from '@/hooks/useCustomers';
+import { usePurchases } from '@/hooks/usePurchases';
 
 interface PurchaseFormProps {
-  customerId: string;
+  customerId?: string;
   purchase?: Purchase | null;
   onSubmit: (data: Omit<Purchase, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => Promise<void>;
   onCancel: () => void;
@@ -16,8 +19,13 @@ interface PurchaseFormProps {
 }
 
 const PurchaseForm = ({ customerId, purchase, onSubmit, onCancel, loading = false }: PurchaseFormProps) => {
+  const { customers } = useCustomers();
+  const { purchases } = usePurchases();
+  const [selectedCustomerId, setSelectedCustomerId] = useState(customerId || purchase?.customer_id || '');
+  const [previousProducts, setPreviousProducts] = useState<Array<{name: string, price: number}>>([]);
+  
   const [formData, setFormData] = useState({
-    customer_id: customerId,
+    customer_id: customerId || purchase?.customer_id || '',
     product_name: purchase?.product_name || '',
     quantity: purchase?.quantity || 1,
     unit_price: purchase?.unit_price || 0,
@@ -25,6 +33,20 @@ const PurchaseForm = ({ customerId, purchase, onSubmit, onCancel, loading = fals
     purchase_date: purchase?.purchase_date || new Date().toISOString().split('T')[0],
     notes: purchase?.notes || ''
   });
+
+  // Get previous products/services for selected customer
+  useEffect(() => {
+    if (selectedCustomerId) {
+      const customerPurchases = purchases.filter(p => p.customer_id === selectedCustomerId);
+      const uniqueProducts = Array.from(
+        new Map(
+          customerPurchases.map(p => [p.product_name, { name: p.product_name, price: p.unit_price }])
+        ).values()
+      );
+      setPreviousProducts(uniqueProducts);
+      setFormData(prev => ({ ...prev, customer_id: selectedCustomerId }));
+    }
+  }, [selectedCustomerId, purchases]);
 
   const calculateTotal = (quantity: number, unitPrice: number) => {
     return quantity * unitPrice;
@@ -56,6 +78,18 @@ const PurchaseForm = ({ customerId, purchase, onSubmit, onCancel, loading = fals
     }));
   };
 
+  const handleProductSelect = (productName: string) => {
+    const product = previousProducts.find(p => p.name === productName);
+    if (product) {
+      setFormData(prev => ({
+        ...prev,
+        product_name: product.name,
+        unit_price: product.price,
+        total_amount: calculateTotal(prev.quantity, product.price)
+      }));
+    }
+  };
+
   const handleChange = (field: keyof typeof formData, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
@@ -68,15 +102,58 @@ const PurchaseForm = ({ customerId, purchase, onSubmit, onCancel, loading = fals
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Customer Selection */}
+            {!customerId && (
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="customer">Customer *</Label>
+                <Select value={selectedCustomerId} onValueChange={setSelectedCustomerId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a customer" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {customers.map((customer) => (
+                      <SelectItem key={customer.id} value={customer.id}>
+                        {customer.name} - {customer.email}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            {/* Product/Service Selection */}
             <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="product_name">Product/Service Name *</Label>
-              <Input
-                id="product_name"
-                value={formData.product_name}
-                onChange={(e) => handleChange('product_name', e.target.value)}
-                required
-                placeholder="Enter product or service name"
-              />
+              <Label htmlFor="product_name">Product/Service *</Label>
+              {previousProducts.length > 0 ? (
+                <div className="space-y-2">
+                  <Select value={formData.product_name} onValueChange={handleProductSelect}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select from previous products or enter new" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {previousProducts.map((product, index) => (
+                        <SelectItem key={index} value={product.name}>
+                          {product.name} (${product.price.toFixed(2)})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Input
+                    id="product_name"
+                    value={formData.product_name}
+                    onChange={(e) => handleChange('product_name', e.target.value)}
+                    placeholder="Or enter new product/service name"
+                  />
+                </div>
+              ) : (
+                <Input
+                  id="product_name"
+                  value={formData.product_name}
+                  onChange={(e) => handleChange('product_name', e.target.value)}
+                  required
+                  placeholder="Enter product or service name"
+                />
+              )}
             </div>
 
             <div className="space-y-2">
@@ -142,7 +219,7 @@ const PurchaseForm = ({ customerId, purchase, onSubmit, onCancel, loading = fals
           </div>
 
           <div className="flex gap-3 pt-4">
-            <Button type="submit" disabled={loading} className="flex-1">
+            <Button type="submit" disabled={loading || !selectedCustomerId} className="flex-1">
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {purchase ? 'Update Purchase' : 'Create Purchase'}
             </Button>

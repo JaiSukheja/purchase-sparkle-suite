@@ -23,6 +23,7 @@ export type Database = {
           email: string
           id: string
           name: string
+          organization_id: string | null
           phone: string
           status: string
           updated_at: string
@@ -36,6 +37,7 @@ export type Database = {
           email: string
           id?: string
           name: string
+          organization_id?: string | null
           phone: string
           status?: string
           updated_at?: string
@@ -49,12 +51,21 @@ export type Database = {
           email?: string
           id?: string
           name?: string
+          organization_id?: string | null
           phone?: string
           status?: string
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "customers_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       invoice_items: {
         Row: {
@@ -113,6 +124,7 @@ export type Database = {
           invoice_date: string
           invoice_number: string
           notes: string | null
+          organization_id: string | null
           status: string
           subtotal: number
           tax_amount: number
@@ -128,6 +140,7 @@ export type Database = {
           invoice_date?: string
           invoice_number: string
           notes?: string | null
+          organization_id?: string | null
           status?: string
           subtotal?: number
           tax_amount?: number
@@ -143,6 +156,7 @@ export type Database = {
           invoice_date?: string
           invoice_number?: string
           notes?: string | null
+          organization_id?: string | null
           status?: string
           subtotal?: number
           tax_amount?: number
@@ -158,7 +172,41 @@ export type Database = {
             referencedRelation: "customers"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "invoices_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      organizations: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       purchases: {
         Row: {
@@ -166,6 +214,7 @@ export type Database = {
           customer_id: string
           id: string
           notes: string | null
+          organization_id: string | null
           product_name: string
           purchase_date: string
           quantity: number
@@ -179,6 +228,7 @@ export type Database = {
           customer_id: string
           id?: string
           notes?: string | null
+          organization_id?: string | null
           product_name: string
           purchase_date?: string
           quantity?: number
@@ -192,6 +242,7 @@ export type Database = {
           customer_id?: string
           id?: string
           notes?: string | null
+          organization_id?: string | null
           product_name?: string
           purchase_date?: string
           quantity?: number
@@ -206,6 +257,13 @@ export type Database = {
             columns: ["customer_id"]
             isOneToOne: false
             referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchases_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]

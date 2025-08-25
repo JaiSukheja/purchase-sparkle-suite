@@ -6,29 +6,41 @@ import CustomerList from "@/components/customers/CustomerList";
 import Dashboard from "@/components/dashboard/Dashboard";
 import PurchaseList from "@/components/dashboard/PurchaseList";
 import Analytics from "@/components/dashboard/Analytics";
+import { ReportsOverview } from "@/components/reports/ReportsOverview";
+import { InvoicesTable } from "@/components/tables/InvoicesTable";
+import { InvoiceViewer } from "@/components/invoices/InvoiceViewer";
+import InvoiceForm from "@/components/forms/InvoiceForm";
 import CustomerForm from "@/components/forms/CustomerForm";
 import { useCustomers } from "@/hooks/useCustomers";
+import { usePurchases } from "@/hooks/usePurchases";
+import { useInvoices } from "@/hooks/useInvoices";
 import { useAuth } from "@/hooks/useAuth";
-import { Customer } from "@/types/database";
-import { LogOut, Menu, X, Home, Users, ShoppingCart, BarChart3 } from "lucide-react";
+import { Customer, Invoice } from "@/types/database";
+import { LogOut, Menu, X, Home, Users, ShoppingCart, BarChart3, FileText, Plus } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
 const Index = () => {
   const navigate = useNavigate();
   const { signOut } = useAuth();
   const { customers, createCustomer, updateCustomer, loading } = useCustomers();
+  const { purchases } = usePurchases();
+  const { invoices, createInvoice, updateInvoice, deleteInvoice } = useInvoices();
   const { toast } = useToast();
-  const [activeView, setActiveView] = useState<'dashboard' | 'customers' | 'purchases' | 'analytics'>('dashboard');
+  const [activeView, setActiveView] = useState<'dashboard' | 'customers' | 'purchases' | 'analytics' | 'invoices' | 'reports'>('dashboard');
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showInvoiceDialog, setShowInvoiceDialog] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [showInvoiceViewer, setShowInvoiceViewer] = useState(false);
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home },
     { id: 'customers', label: 'Customers', icon: Users },
     { id: 'purchases', label: 'Purchases', icon: ShoppingCart },
-    { id: 'analytics', label: 'Analytics', icon: BarChart3 },
+    { id: 'invoices', label: 'Invoices', icon: FileText },
+    { id: 'reports', label: 'Reports', icon: BarChart3 },
   ];
 
   const handleEditCustomer = (customer: Customer) => {
@@ -76,6 +88,43 @@ const Index = () => {
     }
   };
 
+  const handleInvoiceSubmit = async (invoiceData: Omit<Invoice, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
+    setFormLoading(true);
+    
+    try {
+      if (selectedInvoice) {
+        await updateInvoice(selectedInvoice.id, invoiceData);
+      } else {
+        await createInvoice(invoiceData);
+      }
+      
+      setShowInvoiceDialog(false);
+      setSelectedInvoice(null);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save invoice",
+        variant: "destructive",
+      });
+    } finally {
+      setFormLoading(false);
+    }
+  };
+
+  const handleEditInvoice = (invoice: Invoice) => {
+    setSelectedInvoice(invoice);
+    setShowInvoiceDialog(true);
+  };
+
+  const handleAddInvoice = () => {
+    setSelectedInvoice(null);
+    setShowInvoiceDialog(true);
+  };
+
+  const handleDeleteInvoice = async (invoiceId: string) => {
+    await deleteInvoice(invoiceId);
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex">
       {/* Mobile sidebar overlay */}
@@ -95,7 +144,7 @@ const Index = () => {
               <button
                 key={item.id}
                 onClick={() => {
-                  setActiveView(item.id as 'dashboard' | 'customers' | 'purchases' | 'analytics');
+                  setActiveView(item.id as 'dashboard' | 'customers' | 'purchases' | 'invoices' | 'reports');
                   setIsSidebarOpen(false);
                 }}
                 className={`w-full flex items-center space-x-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${
@@ -123,7 +172,7 @@ const Index = () => {
           {navItems.map((item) => (
             <button
               key={item.id}
-              onClick={() => setActiveView(item.id as 'dashboard' | 'customers' | 'purchases' | 'analytics')}
+              onClick={() => setActiveView(item.id as 'dashboard' | 'customers' | 'purchases' | 'invoices' | 'reports')}
               className={`w-full flex items-center space-x-3 px-3 xl:px-4 py-2.5 xl:py-3 text-sm xl:text-base font-medium rounded-lg transition-all duration-200 ${
                 activeView === item.id
                   ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-md'
@@ -170,6 +219,9 @@ const Index = () => {
                 customers={customers}
                 onEditCustomer={handleEditCustomer}
                 onViewCustomer={handleViewCustomer}
+                onAddCustomer={handleAddCustomer}
+                onAddPurchase={() => setActiveView('purchases')}
+                onAddInvoice={handleAddInvoice}
               />
             )}
             
@@ -187,10 +239,43 @@ const Index = () => {
               <PurchaseList onBack={() => setActiveView('dashboard')} />
             )}
             
-            {activeView === 'analytics' && (
-              <Analytics 
-                customers={customers} 
-                onBack={() => setActiveView('dashboard')} 
+            {activeView === 'invoices' && (
+              <div className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h1 className="text-3xl font-bold">Invoices</h1>
+                    <p className="text-muted-foreground">Manage your customer invoices</p>
+                  </div>
+                  <Button onClick={handleAddInvoice}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    New Invoice
+                  </Button>
+                </div>
+                <InvoicesTable
+                  invoices={invoices}
+                  onEdit={handleEditInvoice}
+                  onDelete={handleDeleteInvoice}
+                  onView={(invoice) => {
+                    setSelectedInvoice(invoice);
+                    setShowInvoiceViewer(true);
+                  }}
+                  onDownload={(invoice) => {
+                    // Add download functionality
+                    console.log('Download invoice:', invoice);
+                  }}
+                  onSend={(invoice) => {
+                    // Add send functionality
+                    console.log('Send invoice:', invoice);
+                  }}
+                />
+              </div>
+            )}
+
+            {activeView === 'reports' && (
+              <ReportsOverview 
+                customers={customers}
+                purchases={purchases}
+                invoices={invoices}
               />
             )}
           </div>
@@ -210,6 +295,39 @@ const Index = () => {
           />
         </DialogContent>
       </Dialog>
+
+      <Dialog open={showInvoiceDialog} onOpenChange={setShowInvoiceDialog}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{selectedInvoice ? 'Edit Invoice' : 'Create New Invoice'}</DialogTitle>
+          </DialogHeader>
+          <InvoiceForm
+            invoice={selectedInvoice}
+            customers={customers}
+            onSubmit={handleInvoiceSubmit}
+            onCancel={() => setShowInvoiceDialog(false)}
+            loading={formLoading}
+          />
+        </DialogContent>
+      </Dialog>
+
+      <InvoiceViewer
+        invoice={selectedInvoice}
+        isOpen={showInvoiceViewer}
+        onClose={() => setShowInvoiceViewer(false)}
+        onDownload={(invoice) => {
+          console.log('Download invoice:', invoice);
+          // Implement download functionality
+        }}
+        onSend={(invoice) => {
+          console.log('Send invoice:', invoice);
+          // Implement send functionality
+        }}
+        onPrint={(invoice) => {
+          console.log('Print invoice:', invoice);
+          window.print();
+        }}
+      />
     </div>
   );
 };

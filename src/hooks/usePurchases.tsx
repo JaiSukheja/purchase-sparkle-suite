@@ -3,12 +3,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { Purchase } from '@/types/database';
 import { useAuth } from './useAuth';
 import { useToast } from './use-toast';
+import { useOrganizationContext } from './useOrganizationContext';
 
 export const usePurchases = (customerId?: string) => {
   const [purchases, setPurchases] = useState<Purchase[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const { toast } = useToast();
+  const { selectedOrganizationId } = useOrganizationContext();
 
   const fetchPurchases = async () => {
     if (!user) return;
@@ -17,14 +19,17 @@ export const usePurchases = (customerId?: string) => {
     let query = supabase
       .from('purchases')
       .select('*')
-      .eq('user_id', user.id)
-      .order('purchase_date', { ascending: false });
+      .eq('user_id', user.id);
+
+    if (selectedOrganizationId) {
+      query = query.eq('organization_id', selectedOrganizationId);
+    }
 
     if (customerId) {
       query = query.eq('customer_id', customerId);
     }
 
-    const { data, error } = await query;
+    const { data, error } = await query.order('purchase_date', { ascending: false });
 
     if (error) {
       toast({
@@ -40,14 +45,14 @@ export const usePurchases = (customerId?: string) => {
 
   useEffect(() => {
     fetchPurchases();
-  }, [user, customerId]);
+  }, [user, customerId, selectedOrganizationId]);
 
   const createPurchase = async (purchaseData: Omit<Purchase, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
-    if (!user) return null;
+    if (!user || !selectedOrganizationId) return null;
 
     const { data, error } = await supabase
       .from('purchases')
-      .insert([{ ...purchaseData, user_id: user.id }])
+      .insert([{ ...purchaseData, user_id: user.id, organization_id: selectedOrganizationId }])
       .select()
       .single();
 
