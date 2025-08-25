@@ -14,6 +14,80 @@ export type Database = {
   }
   public: {
     Tables: {
+      customer_auth: {
+        Row: {
+          created_at: string
+          customer_id: string
+          email: string
+          id: string
+          password_hash: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          email: string
+          id?: string
+          password_hash: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          email?: string
+          id?: string
+          password_hash?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_auth_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_comments: {
+        Row: {
+          comment: string
+          created_at: string
+          customer_id: string
+          id: string
+          purchase_id: string
+        }
+        Insert: {
+          comment: string
+          created_at?: string
+          customer_id: string
+          id?: string
+          purchase_id: string
+        }
+        Update: {
+          comment?: string
+          created_at?: string
+          customer_id?: string
+          id?: string
+          purchase_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_comments_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_comments_purchase_id_fkey"
+            columns: ["purchase_id"]
+            isOneToOne: false
+            referencedRelation: "purchases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customers: {
         Row: {
           address: string | null
@@ -273,7 +347,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      authenticate_customer: {
+        Args: { p_email: string; p_password: string }
+        Returns: {
+          customer_email: string
+          customer_id: string
+          customer_name: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
