@@ -15,7 +15,7 @@ const OrganizationSelection = () => {
     if (selectedOrgId) {
       // Store selected organization in localStorage for persistence
       localStorage.setItem('selectedOrganizationId', selectedOrgId);
-      navigate('/dashboard');
+      navigate('/app/dashboard');
     }
   };
 

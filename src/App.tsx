@@ -7,7 +7,12 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { CustomerAuthProvider } from "@/hooks/useCustomerAuth";
 import { OrganizationProvider } from "@/hooks/useOrganizationContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import Index from "./pages/Index";
+import AppLayout from "@/components/layout/AppLayout";
+import DashboardPage from "./pages/Dashboard";
+import Customers from "./pages/Customers";
+import Purchases from "./pages/Purchases";
+import Invoices from "./pages/Invoices";
+import Reports from "./pages/Reports";
 import Auth from "./pages/Auth";
 import Landing from "./pages/Landing";
 import OrganizationSelection from "./pages/OrganizationSelection";
@@ -35,11 +40,54 @@ const App = () => (
                     <OrganizationSelection />
                   </ProtectedRoute>
                 } />
+                <Route path="/app" element={
+                  <ProtectedRoute>
+                    <AppLayout />
+                  </ProtectedRoute>
+                }>
+                  <Route path="dashboard" element={<DashboardPage />} />
+                  <Route path="customers" element={<Customers />} />
+                  <Route path="purchases" element={<Purchases />} />
+                  <Route path="invoices" element={<Invoices />} />
+                  <Route path="reports" element={<Reports />} />
+                  <Route index element={<DashboardPage />} />
+                </Route>
+                {/* Legacy route redirect */}
                 <Route path="/dashboard" element={
                   <ProtectedRoute>
-                    <Index />
+                    <AppLayout />
                   </ProtectedRoute>
-                } />
+                }>
+                  <Route index element={<DashboardPage />} />
+                </Route>
+                <Route path="/customers" element={
+                  <ProtectedRoute>
+                    <AppLayout />
+                  </ProtectedRoute>
+                }>
+                  <Route index element={<Customers />} />
+                </Route>
+                <Route path="/purchases" element={
+                  <ProtectedRoute>
+                    <AppLayout />
+                  </ProtectedRoute>
+                }>
+                  <Route index element={<Purchases />} />
+                </Route>
+                <Route path="/invoices" element={
+                  <ProtectedRoute>
+                    <AppLayout />
+                  </ProtectedRoute>
+                }>
+                  <Route index element={<Invoices />} />
+                </Route>
+                <Route path="/reports" element={
+                  <ProtectedRoute>
+                    <AppLayout />
+                  </ProtectedRoute>
+                }>
+                  <Route index element={<Reports />} />
+                </Route>
                 <Route path="/customer/:id" element={
                   <ProtectedRoute>
                     <CustomerDetail />

@@ -25,7 +25,7 @@ import PurchaseForm from "../forms/PurchaseForm";
 import { useToast } from "@/components/ui/use-toast";
 
 interface PurchaseListProps {
-  onBack: () => void;
+  onBack?: () => void;
 }
 
 const PurchaseList = ({ onBack }: PurchaseListProps) => {
