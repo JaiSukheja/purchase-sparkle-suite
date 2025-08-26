@@ -1,9 +1,10 @@
 import { Users, DollarSign, ShoppingCart, TrendingUp } from "lucide-react";
 import StatsCard from "./StatsCard";
+import { mockStats, mockCustomers, mockPurchases } from "@/data/mockData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import CustomerCard from "../customers/CustomerCard";
 import { Customer } from "@/types/database";
-import { usePurchases } from "@/hooks/usePurchases";
+import { useState } from "react";
 
 interface DashboardProps {
   customers: Customer[];
@@ -15,20 +16,10 @@ interface DashboardProps {
 }
 
 const Dashboard = ({ customers, onEditCustomer, onViewCustomer, onAddCustomer, onAddPurchase, onAddInvoice }: DashboardProps) => {
-  const { purchases } = usePurchases();
   const recentCustomers = customers.slice(0, 3);
-  const recentPurchases = purchases
-    .sort((a, b) => new Date(b.purchase_date).getTime() - new Date(a.purchase_date).getTime())
+  const recentPurchases = mockPurchases
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     .slice(0, 5);
-
-  // Calculate stats from real data
-  const totalRevenue = purchases.reduce((sum, p) => sum + p.total_amount, 0);
-  const thisMonthPurchases = purchases.filter(p => {
-    const purchaseDate = new Date(p.purchase_date);
-    const now = new Date();
-    return purchaseDate.getMonth() === now.getMonth() && purchaseDate.getFullYear() === now.getFullYear();
-  });
-  const thisMonthRevenue = thisMonthPurchases.reduce((sum, p) => sum + p.total_amount, 0);
 
   return (
     <div className="space-y-8">
@@ -55,14 +46,18 @@ const Dashboard = ({ customers, onEditCustomer, onViewCustomer, onAddCustomer, o
           trend={{ value: "8.2%", isPositive: true }}
         />
         <StatsCard
-          title="Total Revenue"
-          value={`$${totalRevenue.toFixed(2)}`}
+          title="This Month"
+          value={customers.filter(c => 
+            new Date(c.created_at).getMonth() === new Date().getMonth()
+          ).length.toString()}
           icon={TrendingUp}
           trend={{ value: "3.1%", isPositive: true }}
         />
         <StatsCard
-          title="This Month Revenue"
-          value={`$${thisMonthRevenue.toFixed(2)}`}
+          title="Recent Signups"
+          value={customers.filter(c => 
+            Date.now() - new Date(c.created_at).getTime() < 7 * 24 * 60 * 60 * 1000
+          ).length.toString()}
           icon={ShoppingCart}
           trend={{ value: "15%", isPositive: true }}
         />

@@ -56,6 +56,9 @@ const CustomerCard = ({ customer, onEdit, onAddPurchase }: CustomerCardProps) =>
         <Button variant="outline" size="sm" onClick={() => onEdit(customer)} className="w-full sm:w-auto text-xs sm:text-sm">
           Edit
         </Button>
+        <Button size="sm" onClick={() => onAddPurchase(customer)} className="w-full sm:w-auto text-xs sm:text-sm">
+          Add Purchase
+        </Button>
       </div>
     </Card>
   );

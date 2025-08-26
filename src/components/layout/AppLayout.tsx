@@ -1,29 +1,21 @@
 import { useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { useOrganizationContext } from "@/hooks/useOrganizationContext";
 import { Button } from "@/components/ui/button";
 import { LogOut, Menu, X, Home, Users, ShoppingCart, BarChart3, FileText } from "lucide-react";
 import { SidebarProvider, Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarTrigger } from "@/components/ui/sidebar";
 
 const AppLayout = () => {
   const { signOut } = useAuth();
-  const { selectedOrganizationId } = useOrganizationContext();
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Redirect to organization selection if no organization is selected
-  if (!selectedOrganizationId) {
-    navigate('/');
-    return null;
-  }
-
   const navItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: Home, path: '/app/dashboard' },
-    { id: 'customers', label: 'Customers', icon: Users, path: '/app/customers' },
-    { id: 'purchases', label: 'Purchases', icon: ShoppingCart, path: '/app/purchases' },
-    { id: 'invoices', label: 'Invoices', icon: FileText, path: '/app/invoices' },
-    { id: 'reports', label: 'Reports', icon: BarChart3, path: '/app/reports' },
+    { id: 'dashboard', label: 'Dashboard', icon: Home, path: '/dashboard' },
+    { id: 'customers', label: 'Customers', icon: Users, path: '/customers' },
+    { id: 'purchases', label: 'Purchases', icon: ShoppingCart, path: '/purchases' },
+    { id: 'invoices', label: 'Invoices', icon: FileText, path: '/invoices' },
+    { id: 'reports', label: 'Reports', icon: BarChart3, path: '/reports' },
   ];
 
   const getActiveView = () => {

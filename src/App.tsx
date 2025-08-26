@@ -54,6 +54,42 @@ const App = () => (
                   <Route path="reports" element={<Reports />} />
                   <Route index element={<DashboardPage />} />
                 </Route>
+                {/* Legacy route redirect */}
+                <Route path="/dashboard" element={
+                  <ProtectedRoute>
+                    <AppLayout />
+                  </ProtectedRoute>
+                }>
+                  <Route index element={<DashboardPage />} />
+                </Route>
+                <Route path="/customers" element={
+                  <ProtectedRoute>
+                    <AppLayout />
+                  </ProtectedRoute>
+                }>
+                  <Route index element={<Customers />} />
+                </Route>
+                <Route path="/purchases" element={
+                  <ProtectedRoute>
+                    <AppLayout />
+                  </ProtectedRoute>
+                }>
+                  <Route index element={<Purchases />} />
+                </Route>
+                <Route path="/invoices" element={
+                  <ProtectedRoute>
+                    <AppLayout />
+                  </ProtectedRoute>
+                }>
+                  <Route index element={<Invoices />} />
+                </Route>
+                <Route path="/reports" element={
+                  <ProtectedRoute>
+                    <AppLayout />
+                  </ProtectedRoute>
+                }>
+                  <Route index element={<Reports />} />
+                </Route>
                 <Route path="/customer/:id" element={
                   <ProtectedRoute>
                     <CustomerDetail />
@@ -61,7 +97,6 @@ const App = () => (
                 } />
                 <Route path="/customer-auth" element={<CustomerAuth />} />
                 <Route path="/customer-portal" element={<CustomerPortal />} />
-                <Route path="/customer-portal/:id" element={<CustomerPortal />} />
                 <Route path="/pricing" element={<Pricing />} />
                 <Route path="/admin" element={
                   <ProtectedRoute>

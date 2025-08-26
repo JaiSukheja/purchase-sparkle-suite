@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Purchase } from '@/types/database';
 import { useAuth } from './useAuth';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from './use-toast';
 import { useOrganizationContext } from './useOrganizationContext';
 
 export const usePurchases = (customerId?: string) => {

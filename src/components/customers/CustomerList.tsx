@@ -52,16 +52,20 @@ const CustomerList = ({ customers, onEditCustomer, onViewCustomer, onAddCustomer
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">Customers</h1>
+          <p className="text-muted-foreground">Manage your customer relationships</p>
+        </div>
+        <Button onClick={onAddCustomer} className="bg-gradient-primary hover:opacity-90">
+          <Plus className="h-4 w-4 mr-2" />
+          Add Customer
+        </Button>
+      </div>
 
       {/* Search and Filters */}
       <Card className="p-4 bg-gradient-card shadow-soft">
         <div className="flex flex-col sm:flex-row gap-4">
-          <div className="flex items-center justify-between w-full sm:w-auto">
-            <Button onClick={onAddCustomer} className="bg-gradient-primary hover:opacity-90 sm:hidden">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Customer
-            </Button>
-          </div>
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -72,10 +76,6 @@ const CustomerList = ({ customers, onEditCustomer, onViewCustomer, onAddCustomer
             />
           </div>
           <div className="flex gap-2">
-            <Button onClick={onAddCustomer} className="bg-gradient-primary hover:opacity-90 hidden sm:flex">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Customer
-            </Button>
             <Button
               variant={filterStatus === 'all' ? 'default' : 'outline'}
               size="sm"

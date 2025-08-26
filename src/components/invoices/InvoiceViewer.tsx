@@ -28,9 +28,9 @@ export const InvoiceViewer = ({
   const getStatusColor = (status: Invoice['status']) => {
     switch (status) {
       case 'paid':
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+        return 'bg-muted text-foreground';
       case 'sent':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+        return 'bg-muted text-foreground';
       case 'overdue':
         return 'bg-destructive/10 text-destructive';
       default:
