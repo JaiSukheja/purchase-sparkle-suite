@@ -1,6 +1,6 @@
 import { useState, useEffect, createContext, useContext } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from './use-toast';
+import { useToast } from '@/hooks/use-toast';
 
 interface Customer {
   id: string;

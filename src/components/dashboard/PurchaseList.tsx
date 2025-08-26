@@ -22,7 +22,7 @@ import { Purchase } from "@/types/database";
 import { usePurchases } from "@/hooks/usePurchases";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import PurchaseForm from "../forms/PurchaseForm";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 interface PurchaseListProps {
   onBack?: () => void;

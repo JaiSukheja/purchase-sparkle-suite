@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Search, Filter, Download, MessageSquare, LogOut, User } from 'lucide-react';
 
 const CustomerPortal = () => {
+  const { id: customerId } = useParams<{ id: string }>();
   const { customer, logout, loading: authLoading } = useCustomerAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -34,13 +35,14 @@ const CustomerPortal = () => {
 
   useEffect(() => {
     const fetchPurchases = async () => {
-      if (!customer) return;
+      const targetCustomerId = customerId || customer?.id;
+      if (!targetCustomerId) return;
 
       try {
         const { data: purchasesData, error } = await supabase
           .from('purchases')
           .select('*')
-          .eq('customer_id', customer.id)
+          .eq('customer_id', targetCustomerId)
           .order('purchase_date', { ascending: false });
 
         if (error) throw error;
@@ -59,7 +61,7 @@ const CustomerPortal = () => {
     };
 
     fetchPurchases();
-  }, [customer, toast]);
+  }, [customer, customerId, toast]);
 
   useEffect(() => {
     let filtered = purchases;

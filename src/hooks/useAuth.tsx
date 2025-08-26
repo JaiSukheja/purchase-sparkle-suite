@@ -1,6 +1,7 @@
 import { useState, useEffect, createContext, useContext } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { useNavigate } from 'react-router-dom';
 
 interface AuthContextType {
   user: User | null;
@@ -30,6 +31,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+        
+        // Clear organization selection on sign out
+        if (event === 'SIGNED_OUT') {
+          localStorage.removeItem('selectedOrganizationId');
+        }
       }
     );
 
@@ -44,6 +50,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const signOut = async () => {
+    localStorage.removeItem('selectedOrganizationId');
     await supabase.auth.signOut();
   };
 
