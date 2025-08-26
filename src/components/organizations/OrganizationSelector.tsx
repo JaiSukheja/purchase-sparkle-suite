@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useSubscription } from '@/hooks/useSubscription';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, Building } from 'lucide-react';
+import { Plus, Building, Crown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface Organization {
@@ -23,6 +24,7 @@ interface OrganizationSelectorProps {
 
 export const OrganizationSelector = ({ selectedOrgId, onOrganizationChange }: OrganizationSelectorProps) => {
   const { user } = useAuth();
+  const { subscription, getOrganizationLimit } = useSubscription();
   const { toast } = useToast();
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [loading, setLoading] = useState(true);
@@ -66,6 +68,17 @@ export const OrganizationSelector = ({ selectedOrgId, onOrganizationChange }: Or
   const createOrganization = async () => {
     if (!user || !newOrgName.trim()) return;
 
+    // Check organization limit
+    const organizationLimit = getOrganizationLimit();
+    if (organizations.length >= organizationLimit) {
+      toast({
+        title: "Organization limit reached",
+        description: `You can create up to ${organizationLimit} organization(s) with your current plan. Please upgrade to create more.`,
+        variant: "destructive"
+      });
+      return;
+    }
+
     setCreating(true);
     try {
       const { data, error } = await supabase
@@ -101,6 +114,11 @@ export const OrganizationSelector = ({ selectedOrgId, onOrganizationChange }: Or
     }
   };
 
+  const canCreateMoreOrganizations = () => {
+    const limit = getOrganizationLimit();
+    return organizations.length < limit;
+  };
+
   if (loading) {
     return <div className="h-10 bg-muted animate-pulse rounded" />;
   }
@@ -127,7 +145,12 @@ export const OrganizationSelector = ({ selectedOrgId, onOrganizationChange }: Or
       
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
         <DialogTrigger asChild>
-          <Button variant="outline" size="icon">
+          <Button 
+            variant="outline" 
+            size="icon"
+            disabled={!canCreateMoreOrganizations()}
+            title={!canCreateMoreOrganizations() ? `Organization limit reached (${getOrganizationLimit()})` : 'Create new organization'}
+          >
             <Plus className="h-4 w-4" />
           </Button>
         </DialogTrigger>

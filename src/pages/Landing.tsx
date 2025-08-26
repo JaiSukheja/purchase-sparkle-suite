@@ -67,6 +67,14 @@ const Landing = () => {
               <Button 
                 variant="outline" 
                 size="lg"
+                onClick={() => navigate('/pricing')}
+                className="border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800"
+              >
+                View Pricing
+              </Button>
+              <Button 
+                variant="secondary" 
+                size="lg"
                 onClick={() => navigate('/customer-auth')}
                 className="border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800"
               >

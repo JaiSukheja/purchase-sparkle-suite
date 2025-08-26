@@ -13,6 +13,8 @@ import Customers from "./pages/Customers";
 import Purchases from "./pages/Purchases";
 import Invoices from "./pages/Invoices";
 import Reports from "./pages/Reports";
+import Pricing from "./pages/Pricing";
+import AdminDashboard from "./pages/AdminDashboard";
 import Auth from "./pages/Auth";
 import Landing from "./pages/Landing";
 import OrganizationSelection from "./pages/OrganizationSelection";
@@ -95,6 +97,12 @@ const App = () => (
                 } />
                 <Route path="/customer-auth" element={<CustomerAuth />} />
                 <Route path="/customer-portal" element={<CustomerPortal />} />
+                <Route path="/pricing" element={<Pricing />} />
+                <Route path="/admin" element={
+                  <ProtectedRoute>
+                    <AdminDashboard />
+                  </ProtectedRoute>
+                } />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
