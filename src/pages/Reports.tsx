@@ -10,11 +10,6 @@ const Reports = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Reports</h1>
-        <p className="text-muted-foreground">Business insights and analytics</p>
-      </div>
-
       <ReportsOverview 
         customers={customers}
         purchases={purchases}

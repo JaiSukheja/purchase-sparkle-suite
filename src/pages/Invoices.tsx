@@ -67,11 +67,6 @@ const Invoices = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Invoices</h1>
-        <p className="text-muted-foreground">Manage your customer invoices</p>
-      </div>
-
       <Tabs defaultValue="invoices" className="w-full">
         <TabsList>
           <TabsTrigger value="invoices" className="flex items-center gap-2">
