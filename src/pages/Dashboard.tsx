@@ -72,8 +72,8 @@ const DashboardPage = () => {
         onEditCustomer={handleEditCustomer}
         onViewCustomer={handleViewCustomer}
         onAddCustomer={handleAddCustomer}
-        onAddPurchase={() => navigate('/purchases')}
-        onAddInvoice={() => navigate('/invoices')}
+        onAddPurchase={() => navigate('/app/purchases')}
+        onAddInvoice={() => navigate('/app/invoices')}
       />
 
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
