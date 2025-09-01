@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { Home, Users, ShoppingCart, FileText, BarChart3, Building, LogOut, Crown, CreditCard } from "lucide-react";
+import { Home, Users, ShoppingCart, FileText, BarChart3, Building, LogOut, Crown, CreditCard, User } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useAdmin } from "@/hooks/useAdmin";
@@ -49,6 +49,7 @@ export function AppSidebar() {
   ];
 
   const accountItems = [
+    { title: "Profile", url: "/app/profile", icon: User },
     { title: "Pricing", url: "/pricing", icon: CreditCard }
   ];
 

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { InvoicesTable } from "@/components/tables/InvoicesTable";
 import { InvoiceViewer } from "@/components/invoices/InvoiceViewer";
 import InvoiceForm from "@/components/forms/InvoiceForm";
@@ -117,18 +118,18 @@ const Invoices = () => {
           <div className="space-y-4">
             <div>
               <label className="text-sm font-medium">Select Customer</label>
-              <select
-                value={selectedCustomerId}
-                onChange={(e) => setSelectedCustomerId(e.target.value)}
-                className="w-full mt-1 px-3 py-2 border border-input bg-background rounded-md"
-              >
-                <option value="">Choose a customer...</option>
-                {customers.map((customer) => (
-                  <option key={customer.id} value={customer.id}>
-                    {customer.name}
-                  </option>
-                ))}
-              </select>
+              <Select value={selectedCustomerId} onValueChange={setSelectedCustomerId}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Choose a customer..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {customers.map((customer) => (
+                    <SelectItem key={customer.id} value={customer.id}>
+                      {customer.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {selectedCustomerId && (

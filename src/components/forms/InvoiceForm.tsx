@@ -251,27 +251,42 @@ const InvoiceForm = ({ invoice, customers, onSubmit, onCancel, loading }: Invoic
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="tax_amount"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Tax Amount</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    placeholder="0.00"
-                    {...field}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
-                    disabled
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="space-y-2">
+            <FormField
+              control={form.control}
+              name="tax_amount"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tax Amount</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      placeholder="0.00"
+                      {...field}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <label htmlFor="taxRate">Tax Rate:</label>
+              <input
+                id="taxRate"
+                type="number"
+                step="0.01"
+                min="0"
+                max="1"
+                value={taxRate}
+                onChange={(e) => setTaxRate(Number(e.target.value))}
+                className="w-20 px-2 py-1 border rounded text-center"
+              />
+              <span>({(taxRate * 100).toFixed(1)}%)</span>
+            </div>
+          </div>
 
           <FormField
             control={form.control}

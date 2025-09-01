@@ -21,6 +21,7 @@ import OrganizationSelection from "./pages/OrganizationSelection";
 import CustomerDetail from "./pages/CustomerDetail";
 import CustomerPortal from "./pages/CustomerPortal";
 import CustomerAuth from "./pages/CustomerAuth";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -52,6 +53,7 @@ const App = () => (
                   <Route path="purchases" element={<Purchases />} />
                   <Route path="invoices" element={<Invoices />} />
                   <Route path="reports" element={<Reports />} />
+                  <Route path="profile" element={<Profile />} />
                   <Route index element={<DashboardPage />} />
                 </Route>
                 {/* Customer Detail Page */}
