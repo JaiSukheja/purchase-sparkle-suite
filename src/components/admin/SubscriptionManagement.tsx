@@ -22,6 +22,7 @@ interface Subscription {
   plan: {
     id: string;
     name: string;
+    description?: string;
     price_monthly: number;
     price_annual: number;
     max_organizations: number;
@@ -303,9 +304,11 @@ export const SubscriptionManagement = () => {
                                   <Label>Plan</Label>
                                   <div className="mt-2 p-3 border rounded-lg">
                                     <div className="font-medium">{selectedSubscription.plan.name}</div>
-                                    <div className="text-sm text-muted-foreground mt-1">
-                                      {selectedSubscription.plan.description}
-                                    </div>
+                                     {selectedSubscription.plan.description && (
+                                       <div className="text-sm text-muted-foreground mt-1">
+                                         {selectedSubscription.plan.description}
+                                       </div>
+                                     )}
                                     <div className="flex gap-4 mt-2 text-sm">
                                       <div>Monthly: ${selectedSubscription.plan.price_monthly}</div>
                                       <div>Annual: ${selectedSubscription.plan.price_annual}</div>

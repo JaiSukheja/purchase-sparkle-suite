@@ -1,7 +1,12 @@
-import EnhancedAdminDashboard from '@/components/enhanced/EnhancedAdminDashboard';
+import { AdminProtectedRoute } from '@/components/admin/AdminProtectedRoute';
+import ComprehensiveAdminDashboard from '@/components/enhanced/ComprehensiveAdminDashboard';
 
 const AdminDashboard = () => {
-  return <EnhancedAdminDashboard />;
+  return (
+    <AdminProtectedRoute>
+      <ComprehensiveAdminDashboard />
+    </AdminProtectedRoute>
+  );
 };
 
 
