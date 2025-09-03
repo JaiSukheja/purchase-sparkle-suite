@@ -19,6 +19,10 @@ const OrganizationSelection = () => {
     }
   };
 
+  const handleSkip = () => {
+    navigate('/app/dashboard');
+  };
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
@@ -44,6 +48,13 @@ const OrganizationSelection = () => {
               className="flex-1"
             >
               Sign Out
+            </Button>
+            <Button 
+              variant="outline"
+              onClick={handleSkip}
+              className="flex-1"
+            >
+              Skip for Now
             </Button>
             <Button 
               onClick={handleContinue}

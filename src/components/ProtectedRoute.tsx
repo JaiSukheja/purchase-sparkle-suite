@@ -14,6 +14,14 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   useEffect(() => {
     if (!loading && !user) {
       navigate('/auth');
+    } else if (!loading && user) {
+      // Check if user needs to select an organization
+      const currentPath = window.location.pathname;
+      const hasSelectedOrg = localStorage.getItem('selectedOrganizationId');
+      
+      if (!hasSelectedOrg && !currentPath.includes('/organization-selection') && !currentPath.includes('/admin')) {
+        navigate('/organization-selection');
+      }
     }
   }, [user, loading, navigate]);
 
