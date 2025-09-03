@@ -43,13 +43,19 @@ const Pricing = () => {
     }
   };
 
-  const handleSelectPlan = (planId: string) => {
+  const handleSelectPlan = async (planId: string) => {
     if (!user) {
       navigate('/auth');
       return;
     }
-    // TODO: Implement Stripe checkout
-    console.log('Selected plan:', planId, 'Billing cycle:', billingCycle);
+    
+    try {
+      // Redirect to dummy checkout
+      const checkoutUrl = `/dummy-checkout?plan_id=${planId}&billing_cycle=${billingCycle}`;
+      window.open(checkoutUrl, '_blank');
+    } catch (error) {
+      console.error('Error creating checkout session:', error);
+    }
   };
 
   return (

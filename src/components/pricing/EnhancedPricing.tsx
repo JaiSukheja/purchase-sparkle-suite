@@ -66,14 +66,19 @@ const EnhancedPricing = () => {
     }
   };
 
-  const handleSelectPlan = (planId: string) => {
+  const handleSelectPlan = async (planId: string) => {
     if (!user) {
       navigate('/auth');
       return;
     }
     
-    console.log('Selected plan:', planId, 'Billing cycle:', billingCycle);
-    // TODO: Integrate with Stripe for subscription creation
+    try {
+      // Redirect to dummy checkout
+      const checkoutUrl = `/dummy-checkout?plan_id=${planId}&billing_cycle=${billingCycle}`;
+      window.open(checkoutUrl, '_blank');
+    } catch (error) {
+      console.error('Error creating checkout session:', error);
+    }
   };
 
   const isCurrentPlan = (planId: string) => {

@@ -24,6 +24,8 @@ import CustomerPortal from "./pages/CustomerPortal";
 import CustomerAuth from "./pages/CustomerAuth";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
+import DummyCheckout from "@/components/payment/DummyCheckout";
+import DummyPortal from "@/components/payment/DummyPortal";
 
 const queryClient = new QueryClient();
 
@@ -73,6 +75,8 @@ const App = () => (
                     <AdminDashboard />
                   </ProtectedRoute>
                 } />
+                <Route path="/dummy-checkout" element={<DummyCheckout />} />
+                <Route path="/dummy-portal" element={<DummyPortal />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
