@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import EnhancedDashboard from "@/components/dashboard/EnhancedDashboard";
+import AnalyticsDashboard from "@/components/dashboard/AnalyticsDashboard";
 import { useCustomers } from "@/hooks/useCustomers";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -62,7 +62,7 @@ const DashboardPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <EnhancedDashboard 
+      <AnalyticsDashboard 
         customers={customers}
         onEditCustomer={handleEditCustomer}
         onViewCustomer={handleViewCustomer}
