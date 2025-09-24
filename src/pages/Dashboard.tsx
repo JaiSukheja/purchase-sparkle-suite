@@ -5,7 +5,8 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import CustomerForm from "@/components/forms/CustomerForm";
 import { Customer } from "@/types/database";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
+import { FormDemo } from "@/components/demo/FormDemo";
 
 const DashboardPage = () => {
   const navigate = useNavigate();
@@ -70,6 +71,12 @@ const DashboardPage = () => {
         onAddPurchase={() => navigate('/app/purchases')}
         onAddInvoice={() => navigate('/app/invoices')}
       />
+
+      <div className="container mx-auto px-4 py-8">
+        <div className="border-t pt-8">
+          <FormDemo />
+        </div>
+      </div>
 
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
